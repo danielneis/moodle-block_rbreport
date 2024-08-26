@@ -109,7 +109,7 @@ wp404s:
   except:
     - master
     - tags
-    - /^WORKPLACE_\d+$/
+    - /^WORKPLACE_(ROLLING_)?\d+$/
 
 wp403r:
   before_script:
@@ -119,7 +119,7 @@ wp403r:
   except:
     - master
     - tags
-    - /^WORKPLACE_\d+$/
+    - /^WORKPLACE_(ROLLING_)?\d+$/
 
 wp403s:
   before_script:
@@ -129,7 +129,7 @@ wp403s:
   except:
     - master
     - tags
-    - /^WORKPLACE_\d+$/
+    - /^WORKPLACE_(ROLLING_)?\d+$/
 
 wp402s:
   before_script:
@@ -139,7 +139,7 @@ wp402s:
   except:
     - master
     - tags
-    - /^WORKPLACE_\d+$/
+    - /^WORKPLACE_(ROLLING_)?\d+$/
 
 lms402:
   before_script:
