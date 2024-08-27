@@ -1,0 +1,5 @@
+filter:
+  notPaths:
+    - scss
+  notNames:
+    - mobile*.mustache
