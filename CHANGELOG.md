@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixed
+- Only changes related to the automated checks
+
 ## 4.4 - 2024-05-21
 ### Changed
 - Only changes to the plugin release process
