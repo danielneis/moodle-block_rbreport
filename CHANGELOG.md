@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.4.3 - 2024-09-03
 ### Fixed
 - Only changes related to the automated checks
 
