@@ -35,6 +35,7 @@ final class rbreport_test extends advanced_testcase {
         require_once(__DIR__ . '/../../edit_form.php');
         require_once(__DIR__ . '/../block_rbreport.php');
         require_once(__DIR__ . '/../edit_form.php');
+        parent::setUpBeforeClass();
     }
 
     /**
