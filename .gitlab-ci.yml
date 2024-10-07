@@ -18,6 +18,7 @@ variables:
   MOODLE_BRANCH_LMS402: MOODLE_402_STABLE
   MOODLE_BRANCH_LMS403: MOODLE_403_STABLE
   MOODLE_BRANCH_LMS404: MOODLE_404_STABLE
+  MOODLE_BRANCH_LMS405: MOODLE_405_STABLE
   MOODLE_BEHAT_WDHOST: "http://selenium-standalone-chrome:4444/wd/hub"
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: ""
@@ -174,6 +175,15 @@ lms404:
   before_script:
     - export MOODLE_REPO=$MOODLE_REPO_LMS
     - export MOODLE_BRANCH=$MOODLE_BRANCH_LMS404
+  <<: *scriptshorttest
+  except:
+    - master
+    - tags
+
+lms405:
+  before_script:
+    - export MOODLE_REPO=$MOODLE_REPO_LMS
+    - export MOODLE_BRANCH=$MOODLE_BRANCH_LMS405
   <<: *scriptshorttest
   except:
     - master
