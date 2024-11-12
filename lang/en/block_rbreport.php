@@ -25,6 +25,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['charttypebar'] = 'Bar';
+$string['charttypebarhorizontal'] = 'Horizontal Bar';
+$string['charttypebarstacked'] = 'Stacked Bar';
+$string['charttypedoughnut'] = 'Doughnut';
+$string['charttypeline'] = 'Line';
+$string['charttypepie'] = 'Pie';
+$string['configcharttype'] = 'Chart type';
 $string['configlayout'] = 'Layout';
 $string['configlayout_help'] = '**Adaptive:** Display as cards only in small blocks<br>
 **Cards:** Always display as cards<br>
@@ -34,6 +41,7 @@ $string['configreport_help'] = 'Custom report that will be embedded into the blo
 $string['configtitle'] = 'Block title';
 $string['displayadaptive'] = 'Adaptive';
 $string['displayascards'] = 'Cards';
+$string['displayaschart'] = 'Chart';
 $string['displayastable'] = 'Table';
 $string['entriesperpage'] = 'Entries per page';
 $string['errormessage'] = 'Error occurred while retrieving the report';

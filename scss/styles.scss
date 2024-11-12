@@ -180,6 +180,9 @@ $min: breakpoint-min($name, $breakpoints);
                 height: 12px;
             }
         }
+        .chart-area .chart-image {
+            width: auto;
+        }
     }
     // Show as cards in side regions except with table layout setting.
     &:not(#block-region-content) .block_rbreport {

@@ -74,7 +74,7 @@ class block_rbreport_edit_form extends block_edit_form {
         } else {
             $mform->addElement('hidden', 'config_reporttype', constants::REPORTTYPE_CORE);
             $mform->setType('config_reporttype', PARAM_INT);
-            $mform->addElement('autocomplete', 'config_corereport', get_string('configreport', 'block_rbreport'), $optionscore);
+            $mform->addElement('autocomplete', 'config_corereport', get_string('configreport', 'block_rbreport'), $optionscore, ['multiple' => true]);
             $mform->addHelpButton('config_corereport', 'configreport', 'block_rbreport');
         }
 
@@ -82,10 +82,23 @@ class block_rbreport_edit_form extends block_edit_form {
             constants::LAYOUT_ADAPTIVE => get_string('displayadaptive', 'block_rbreport'),
             constants::LAYOUT_CARDS => get_string('displayascards', 'block_rbreport'),
             constants::LAYOUT_TABLE => get_string('displayastable', 'block_rbreport'),
+            constants::LAYOUT_CHART => get_string('displayaschart', 'block_rbreport'),
         ];
         $mform->addElement('select', 'config_layout', get_string('configlayout', 'block_rbreport'),
             $options);
         $mform->addHelpButton('config_layout', 'configlayout', 'block_rbreport');
+
+        $chartoptions = [
+            constants::CHARTTYPE_BAR => get_string('charttypebar' , 'block_rbreport'),
+            constants::CHARTTYPE_BAR_STACKED  => get_string('charttypebarstacked' , 'block_rbreport'),
+            constants::CHARTTYPE_BAR_HORIZONTAL => get_string('charttypebarhorizontal' , 'block_rbreport'),
+            constants::CHARTTYPE_LINE => get_string('charttypeline' , 'block_rbreport'),
+            constants::CHARTTYPE_PIE => get_string('charttypepie' , 'block_rbreport'),
+            constants::CHARTTYPE_DOUGHNUT => get_string('charttypedoughnut' , 'block_rbreport'),
+        ];
+        $mform->addElement('select', 'config_charttype', get_string('configcharttype', 'block_rbreport'),
+            $chartoptions);
+        $mform->hideIf('config_charttype', 'config_layout', 'ne', constants::LAYOUT_CHART);
 
         $cardsarray = [1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 10 => 10, 25 => 25, 50 => 50];
         $mform->addElement('select', 'config_pagesize', get_string('entriesperpage', 'block_rbreport'), $cardsarray);

@@ -15,6 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use block_rbreport\constants;
+use core_reportbuilder\table\custom_report_table_view;
+use core_reportbuilder\table\custom_report_table_view_filterset;
+use core_table\local\filter\integer_filter;
 
 /**
  * Custom report block.
@@ -65,6 +68,7 @@ class block_rbreport extends block_base {
         }
 
         $this->content = new stdClass();
+        $this->content->text = '';
 
         if ($report = $this->get_core_report()) {
             $report->set_default_per_page(((int)$this->config->pagesize) ?: $report->get_default_per_page());
@@ -77,23 +81,28 @@ class block_rbreport extends block_base {
             if ($configlayout === constants::LAYOUT_TABLE) {
                 $report->add_attributes(['data-force-table' => '']);
             }
+            if ($configlayout === constants::LAYOUT_CHART) {
+                $report->add_attributes(['data-force-chart' => '']);
+                $this->content->text .= $this->chart_html();
+            } else {
+                $outputpage = new \core_reportbuilder\output\custom_report($report->get_report_persistent(), false);
+                $output = $this->page->get_renderer('core_reportbuilder');
+                $export = $outputpage->export_for_template($output);
+                $outputhtml = $output->render_from_template('core_reportbuilder/report', $export);
+                $this->content->text .= html_writer::div($outputhtml);
 
-            $outputpage = new \core_reportbuilder\output\custom_report($report->get_report_persistent(), false);
-            $output = $this->page->get_renderer('core_reportbuilder');
-            $export = $outputpage->export_for_template($output);
-            $outputhtml = $output->render_from_template('core_reportbuilder/report', $export);
-            $this->content->text = html_writer::div($outputhtml);
-            $fullreporturl = new moodle_url('/reportbuilder/view.php', ['id' => $report->get_report_persistent()->get('id')]);
-            $this->content->footer = html_writer::link($fullreporturl, get_string('gotofullreport', 'block_rbreport'));
+                $fullreporturl = new moodle_url('/reportbuilder/view.php', ['id' => $report->get_report_persistent()->get('id')]);
+                $this->content->footer = html_writer::link($fullreporturl, get_string('gotofullreport', 'block_rbreport'));
+            }
         } else if ($report = $this->get_tool_report()) {
             [$text, $footer] = component_class_callback(\tool_tenant\local\block_rbreport::class,
                 'display_report', [$report, $this->page], ['', '']);
             $configlayout = $this->config->layout ?? '';
             $layoutclass = !empty($configlayout) ? 'rblayout rblayout-' . $this->config->layout : '';
-            $this->content->text = html_writer::div($text, $layoutclass);
+            $this->content->text .= html_writer::div($text, $layoutclass);
             $this->content->footer = $footer;
         } else {
-            $this->content->text = $this->user_can_edit() && $this->page->user_is_editing() ? $this->statusmessage : '';
+            $this->content->text .= $this->user_can_edit() && $this->page->user_is_editing() ? $this->statusmessage : '';
         }
 
         return $this->content;
@@ -163,24 +172,21 @@ class block_rbreport extends block_base {
      *
      * @return \core_reportbuilder\local\report\base|null
      */
-    protected function get_core_report(): ?\core_reportbuilder\local\report\base {
-        if ($this->corereport === false) {
-            $this->corereport = null;
-            $reportid = $this->config->corereport ??
-                component_class_callback(\tool_tenant\local\block_rbreport::class,
-                    'get_converted_report_id', [$this->config], 0);
-            if ($reportid) {
-                try {
-                    $report = \core_reportbuilder\manager::get_report_from_id($reportid);
-                    if (\core_reportbuilder\permission::can_view_report($report->get_report_persistent())) {
-                        $this->corereport = $report;
-                    }
-                } catch (moodle_exception $e) {
-                    return null;
+    protected function get_core_report($key = 0): ?\core_reportbuilder\local\report\base {
+        $reportid = $this->config->corereport[$key] ??
+            component_class_callback(\tool_tenant\local\block_rbreport::class,
+                'get_converted_report_id', [$this->config], 0);
+        if ($reportid) {
+            try {
+                $report = \core_reportbuilder\manager::get_report_from_id($reportid);
+                if (\core_reportbuilder\permission::can_view_report($report->get_report_persistent())) {
+                    return $report;
                 }
+            } catch (moodle_exception $e) {
+                return null;
             }
         }
-        return $this->corereport;
+        return null;
     }
 
     /**
@@ -199,4 +205,90 @@ class block_rbreport extends block_base {
         }
         return $this->toolreport;
     }
+
+    protected function chart_html() {
+        global $OUTPUT;
+
+        switch ($this->config->charttype) {
+            case constants::CHARTTYPE_BAR:
+                $chart = new core\chart_bar();
+                break;
+            case constants::CHARTTYPE_BAR_STACKED:
+                $chart = new core\chart_bar();
+                $chart->set_stacked(true);
+                break;
+            case constants::CHARTTYPE_BAR_HORIZONTAL:
+                $chart = new core\chart_bar();
+                $chart->set_horizontal(true);
+                break;
+            case constants::CHARTTYPE_LINE:
+                $chart = new core\chart_line();
+                break;
+            case constants::CHARTTYPE_PIE:
+                $chart = new core\chart_pie();
+                break;
+            case constants::CHARTTYPE_DOUGHNUT:
+                $chart = new core\chart_pie();
+                $chart->set_doughnut(true);
+                break;
+            default:
+                $chart = new core\chart_bar();
+        }
+
+        $allseries = [];
+        $labels = [];
+        $headers = [];
+        foreach ($this->config->corereport as $key => $id) {
+            $report = $this->get_core_report($key);
+            // We store the pagesize within the table filterset so that it's available between AJAX requests.
+            $filterset = new custom_report_table_view_filterset();
+            $filterset->add_filter(new integer_filter('pagesize', null, [(int)$this->config->pagesize]));
+
+            $table = custom_report_table_view::create($report->get_report_persistent()->get('id'));
+            $table->set_filterset($filterset);
+            $table->pagesize = 0;
+            $table->setup();
+            $table->query_db(0);
+
+            $columns = array_keys($report->get_active_columns_by_alias());
+            $series = [];
+            foreach ($table->rawdata as $r) {
+                $arrayr = (array)$r;
+                $index = reset($arrayr);
+                $formattedrow = $table->format_row($r);
+                $c0 = $formattedrow[$columns[0]];
+                $c1 = (float)$formattedrow[$columns[1]];
+                $series[$index] = $c1;
+                if (!isset($labels[$index])) {
+                    $labels[$index] = $c0;
+                }
+                if ($key > 0) {
+                    if (!isset($allseries[$key-1][$index])) {
+                        $allseries[$key-1][$index] = 0;
+                    }
+                }
+            }
+            $headers[] = $table->headers[1];
+            $allseries[$key] = $series;
+        }
+        foreach ($labels as $lkey => $l) {
+            foreach ($allseries as $askey => $s) {
+                if (!isset($s[$lkey])) {
+                    $allseries[$askey][$lkey] = 0;
+                }
+            }
+        }
+        foreach ($allseries as $key => $s) {
+            ksort($s);
+            $cs = new core\chart_series($headers[$key], array_values($s));
+            $chart->add_series($cs);
+        }
+        ksort($labels);
+
+        $chart->set_labels(array_values($labels));
+        return '<div class="container-fluid">' .
+               $OUTPUT->render_chart($chart) .
+               '</div>';
+    }
+
 }
