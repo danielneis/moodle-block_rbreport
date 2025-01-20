@@ -32,6 +32,7 @@ $string['charttypedoughnut'] = 'Doughnut';
 $string['charttypeline'] = 'Line';
 $string['charttypepie'] = 'Pie';
 $string['configcharttype'] = 'Chart type';
+$string['configcumulative'] = 'Accumulate data successively';
 $string['configlayout'] = 'Layout';
 $string['configlayout_help'] = '**Adaptive:** Display as cards only in small blocks<br>
 **Cards:** Always display as cards<br>
