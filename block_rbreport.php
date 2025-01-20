@@ -258,7 +258,11 @@ class block_rbreport extends block_base {
                 $formattedrow = $table->format_row($r);
                 $c0 = $formattedrow[$columns[0]];
                 $c1 = (float)$formattedrow[$columns[1]];
-                $series[$index] = $c1;
+                if ($this->config->cumulative && $index > 0) {
+                    $series[$index] = end($series) + $c1;
+                } else {
+                    $series[$index] = $c1;
+                }
                 if (!isset($labels[$index])) {
                     $labels[$index] = $c0;
                 }

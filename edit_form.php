@@ -100,6 +100,9 @@ class block_rbreport_edit_form extends block_edit_form {
             $chartoptions);
         $mform->hideIf('config_charttype', 'config_layout', 'ne', constants::LAYOUT_CHART);
 
+        $mform->addElement('advcheckbox', 'config_cumulative', get_string('configcumulative', 'block_rbreport'));
+        $mform->hideIf('config_cumulative', 'config_layout', 'ne', constants::LAYOUT_CHART);
+
         $cardsarray = [1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 10 => 10, 25 => 25, 50 => 50];
         $mform->addElement('select', 'config_pagesize', get_string('entriesperpage', 'block_rbreport'), $cardsarray);
         $mform->setDefault('config_pagesize', 5);
