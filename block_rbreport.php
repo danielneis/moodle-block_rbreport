@@ -257,7 +257,7 @@ class block_rbreport extends block_base {
                 $index = reset($arrayr);
                 $formattedrow = $table->format_row($r);
                 $c0 = $formattedrow[$columns[0]];
-                $c1 = (float)$formattedrow[$columns[1]];
+                $c1 = floatval(str_replace(',', '.', $formattedrow[$columns[1]]));
                 if ($this->config->cumulative && $index > 0) {
                     $series[$index] = end($series) + $c1;
                 } else {
