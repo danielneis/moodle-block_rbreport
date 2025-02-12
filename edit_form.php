@@ -103,6 +103,24 @@ class block_rbreport_edit_form extends block_edit_form {
         $mform->addElement('advcheckbox', 'config_cumulative', get_string('configcumulative', 'block_rbreport'));
         $mform->hideIf('config_cumulative', 'config_layout', 'ne', constants::LAYOUT_CHART);
 
+        $mform->addElement('advcheckbox', 'config_chartpiepercent', get_string('configchartpiepercent', 'block_rbreport'));
+        $mform->hideIf('config_chartpiepercent', 'config_layout', 'ne', constants::LAYOUT_CHART);
+
+        $mform->addElement('advcheckbox', 'config_setminmax', get_string('configsetminmax', 'block_rbreport'));
+        $mform->hideIf('config_setminmax', 'config_layout', 'ne', constants::LAYOUT_CHART);
+
+        $mform->addElement('text', 'config_chartmin', get_string('configchartmin', 'block_rbreport'));
+        $mform->hideIf('config_chartmin', 'config_setminmax', 'ne', 1);
+
+        $mform->addElement('text', 'config_chartmax', get_string('configchartmax', 'block_rbreport'));
+        $mform->hideIf('config_chartmax', 'config_setminmax', 'ne', 1);
+
+        $mform->addElement('advcheckbox', 'config_setstepsize', get_string('configsetstepsize', 'block_rbreport'));
+        $mform->hideIf('config_setstepsize', 'config_layout', 'ne', constants::LAYOUT_CHART);
+
+        $mform->addElement('text', 'config_chartstepsize', get_string('configchartstepsize', 'block_rbreport'));
+        $mform->hideIf('config_chartstepsize', 'config_setstepsize', 'ne', 1);
+
         $cardsarray = [1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 10 => 10, 25 => 25, 50 => 50];
         $mform->addElement('select', 'config_pagesize', get_string('entriesperpage', 'block_rbreport'), $cardsarray);
         $mform->setDefault('config_pagesize', 5);

@@ -235,6 +235,21 @@ class block_rbreport extends block_base {
                 $chart = new core\chart_bar();
         }
 
+        if (!empty($this->config->setminmax)) {
+            if (!empty($this->config->chartmin)) {
+                $yaxis = $chart->get_yaxis(0, true);
+                $yaxis->set_min($this->config->chartmin);
+            }
+            if (!empty($this->config->chartmax)) {
+                $yaxis = $chart->get_yaxis(0, true);
+                $yaxis->set_max($this->config->chartmax);
+            }
+        }
+        if (!empty($this->config->setstepsize) && !empty($this->config->chartstepsize)) {
+            $yaxis = $chart->get_yaxis();
+            $yaxis->set_stepsize($this->config->chartstepsize);
+        }
+
         $allseries = [];
         $labels = [];
         $headers = [];
@@ -252,23 +267,54 @@ class block_rbreport extends block_base {
 
             $columns = array_keys($report->get_active_columns_by_alias());
             $series = [];
-            foreach ($table->rawdata as $r) {
-                $arrayr = (array)$r;
-                $index = reset($arrayr);
-                $formattedrow = $table->format_row($r);
-                $c0 = $formattedrow[$columns[0]];
-                $c1 = floatval(str_replace(',', '.', $formattedrow[$columns[1]]));
-                if ($this->config->cumulative && $index > 0) {
-                    $series[$index] = end($series) + $c1;
-                } else {
-                    $series[$index] = $c1;
-                }
-                if (!isset($labels[$index])) {
-                    $labels[$index] = $c0;
-                }
-                if ($key > 0) {
-                    if (!isset($allseries[$key-1][$index])) {
-                        $allseries[$key-1][$index] = 0;
+            if ((($this->config->charttype == constants::CHARTTYPE_PIE) ||
+                 ($this->config->charttype == constants::CHARTTYPE_DOUGHNUT)) &&
+                !empty($this->config->chartpiepercent)) {
+                    $total = 0;
+                    $data = [];
+                    foreach ($table->rawdata as $r) {
+                        $arrayr = (array)$r;
+                        $index = reset($arrayr);
+                        $formattedrow = $table->format_row($r);
+                        $c1 = floatval(str_replace(',', '.', $formattedrow[$columns[1]]));
+                        $total = $total + $c1;
+                        $data[] = $arrayr;
+                    }
+                    foreach ($data as $r) {
+                        $index = reset($r);
+                        $formattedrow = $table->format_row($r);
+                        $c0 = strip_tags($formattedrow[$columns[0]]);
+                        $c1 = floatval(str_replace(',', '.', $formattedrow[$columns[1]]));
+                        $series[$index] = floatval(number_format(($c1 / $total) * 100, 2));
+                        if (!isset($labels[$index])) {
+                            $labels[$index] = $c0;
+                        }
+                        if ($key > 0) {
+                            if (!isset($allseries[$key-1][$index])) {
+                                $allseries[$key-1][$index] = 0;
+                            }
+                        }
+                    }
+            } else {
+
+                foreach ($table->rawdata as $r) {
+                    $arrayr = (array)$r;
+                    $index = reset($arrayr);
+                    $formattedrow = $table->format_row($r);
+                    $c0 = strip_tags($formattedrow[$columns[0]]);
+                    $c1 = floatval(str_replace(',', '.', $formattedrow[$columns[1]]));
+                    if ($this->config->cumulative && $index > 0) {
+                        $series[$index] = end($series) + $c1;
+                    } else {
+                        $series[$index] = $c1;
+                    }
+                    if (!isset($labels[$index])) {
+                        $labels[$index] = $c0;
+                    }
+                    if ($key > 0) {
+                        if (!isset($allseries[$key-1][$index])) {
+                            $allseries[$key-1][$index] = 0;
+                        }
                     }
                 }
             }
