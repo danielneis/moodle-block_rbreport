@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_rbreport';
 $plugin->release = '4.5.4';
-$plugin->version = 2025031801; // Version can only be increased by 1, it is no longer the current date.
+$plugin->version = 2025071100; // Version can only be increased by 1, it is no longer the current date.
 $plugin->requires = 2023042400.00;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->supported = [402, 405];
