@@ -311,21 +311,34 @@ class block_rbreport extends block_base {
                     if (!isset($labels[$index])) {
                         $labels[$index] = $c0;
                     }
-                    if ($key > 0) {
-                        if (!isset($allseries[$key-1][$index])) {
-                            $allseries[$key-1][$index] = 0;
-                        }
-                    }
                 }
             }
             $headers[] = $table->headers[1];
             $allseries[$key] = $series;
         }
+        ksort($labels);
         foreach ($labels as $lkey => $l) {
             foreach ($allseries as $askey => $s) {
                 if (!isset($s[$lkey])) {
-                    $allseries[$askey][$lkey] = 0;
+                    if ($this->config->cumulative && !empty($lastlabel)) {
+                        $lastkey = null;
+                        foreach ($s as $skey => $sval) {
+                            if ($skey < $lkey) {
+                                $lastkey = $skey;
+                            } else {
+                                break;
+                            }
+                        }
+                        if ($lastkey) {
+                            $allseries[$askey][$lkey] = $s[$lastkey];
+                        } else {
+                            $allseries[$askey][$lkey] = 0;
+                        }
+                    } else {
+                        $allseries[$askey][$lkey] = 0;
+                    }
                 }
+                $lastlabel = $lkey;
             }
         }
         foreach ($allseries as $key => $s) {
@@ -333,7 +346,6 @@ class block_rbreport extends block_base {
             $cs = new core\chart_series($headers[$key], array_values($s));
             $chart->add_series($cs);
         }
-        ksort($labels);
 
         $chart->set_labels(array_values($labels));
         return '<div class="container-fluid">' .
